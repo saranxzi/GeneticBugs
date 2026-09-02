@@ -356,3 +356,73 @@ class Environment:
                 bug.proximity_score = 0.0
 
             bug.total_fitness = max(0.0, bug.food_score + bug.survival_score + bug.hazard_penalty + bug.proximity_score)
+
+
+class GeneticAlgorithm:
+    """Selection, uniform crossover, Gaussian mutation, and elitism for bug brains."""
+
+    def __init__(self, config: SimulationConfig):
+        self.config = config
+        self.rng = np.random.default_rng(config.seed)
+
+    def initialize_population(self) -> List[np.ndarray]:
+        return [
+            BugBrain.random_genome(self.config.num_inputs, self.config.num_hidden, self.config.num_outputs, rng=self.rng)
+            for _ in range(self.config.population_size)
+        ]
+
+    def tournament_selection(self, population: List[np.ndarray], fitnesses: List[float]) -> np.ndarray:
+        k = min(self.config.tournament_size, len(population))
+        indices = self.rng.choice(len(population), size=k, replace=False)
+        best_idx = max(indices, key=lambda idx: fitnesses[idx])
+        return population[best_idx].copy()
+
+    def uniform_crossover(self, parent_a: np.ndarray, parent_b: np.ndarray) -> np.ndarray:
+        if self.rng.random() > self.config.crossover_rate:
+            return parent_a.copy()
+        mask = self.rng.random(len(parent_a)) < 0.5
+        return np.where(mask, parent_a, parent_b).astype(np.float32)
+
+    def mutate(self, genome: np.ndarray) -> np.ndarray:
+        mutated = genome.copy()
+        mutate_mask = self.rng.random(len(mutated)) < self.config.mutation_rate
+        noise = self.rng.normal(0.0, self.config.mutation_sigma, len(mutated)).astype(np.float32)
+        mutated += np.where(mutate_mask, noise, 0.0).astype(np.float32)
+
+        reset_mask = self.rng.random(len(mutated)) < self.config.random_reset_rate
+        if np.any(reset_mask):
+            random_weights = self.rng.normal(0.0, 0.8, len(mutated)).astype(np.float32)
+            mutated = np.where(reset_mask, random_weights, mutated).astype(np.float32)
+
+        return mutated
+
+    def evolve_generation(self, population: List[np.ndarray], bugs: List[BugState]) -> Tuple[List[np.ndarray], Dict[str, Any]]:
+        sorted_indices = sorted(range(len(bugs)), key=lambda i: bugs[i].total_fitness, reverse=True)
+        fitnesses = [bugs[i].total_fitness for i in range(len(bugs))]
+        best = bugs[sorted_indices[0]]
+        worst = bugs[sorted_indices[-1]]
+
+        stats = {
+            "best_fitness": round(float(best.total_fitness), 2),
+            "avg_fitness": round(float(np.mean(fitnesses)), 2),
+            "worst_fitness": round(float(worst.total_fitness), 2),
+            "best_food": int(best.food_eaten),
+            "avg_food": round(float(np.mean([b.food_eaten for b in bugs])), 2),
+            "best_ticks_alive": int(best.ticks_alive),
+            "breakdown": {
+                "food_score": round(float(best.food_score), 2),
+                "survival_score": round(float(best.survival_score), 2),
+                "hazard_penalty": round(float(best.hazard_penalty), 2),
+                "proximity_score": round(float(best.proximity_score), 2),
+            }
+        }
+
+        # Elitism
+        next_pop = [population[sorted_indices[i]].copy() for i in range(min(self.config.elitism_count, len(sorted_indices)))]
+        while len(next_pop) < self.config.population_size:
+            p_a = self.tournament_selection(population, fitnesses)
+            p_b = self.tournament_selection(population, fitnesses)
+            child = self.mutate(self.uniform_crossover(p_a, p_b))
+            next_pop.append(child)
+
+        return next_pop, stats

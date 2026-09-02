@@ -1,1 +1,1 @@
-from .sim import SimulationConfig, BugBrain, Hazard, FoodPellet, BugState, Environment
+from .sim import SimulationConfig, BugBrain, Hazard, FoodPellet, BugState, Environment, GeneticAlgorithm
