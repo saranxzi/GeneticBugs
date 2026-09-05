@@ -426,3 +426,62 @@ class GeneticAlgorithm:
             next_pop.append(child)
 
         return next_pop, stats
+
+
+class SimulationRunner:
+    """Coordinates headless evolution loop and generates run summaries."""
+
+    def __init__(self, config: Optional[SimulationConfig] = None):
+        self.config = config or SimulationConfig()
+        self.env = Environment(self.config)
+        self.ga = GeneticAlgorithm(self.config)
+
+    def run(self, progress_callback: Optional[Callable[[int, int, Dict[str, Any]], None]] = None) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+        start = time.time()
+        population = self.ga.initialize_population()
+        history: List[Dict[str, Any]] = []
+        overall_champion: Optional[Dict[str, Any]] = None
+        max_fit = -float("inf")
+
+        for gen in range(self.config.generations):
+            self.env.reset_generation(gen_seed=self.config.seed, bugs_genomes=population)
+            for tick in range(self.config.ticks_per_generation):
+                self.env.step_tick(tick)
+            self.env.finalize_fitness()
+
+            population, stats = self.ga.evolve_generation(population, self.env.bugs)
+            stats["generation"] = gen
+            history.append(stats)
+
+            if stats["best_fitness"] > max_fit:
+                max_fit = stats["best_fitness"]
+                overall_champion = {
+                    "generation": gen, "fitness": stats["best_fitness"],
+                    "food_eaten": stats["best_food"], "ticks_alive": stats["best_ticks_alive"]
+                }
+
+            if progress_callback:
+                progress_callback(gen, self.config.generations, stats)
+
+        elapsed = round(time.time() - start, 2)
+        summary = {
+            "arena": {"width": self.config.arena_width, "height": self.config.arena_height},
+            "config": self.config.to_dict(),
+            "total_generations": self.config.generations,
+            "elapsed_seconds": elapsed,
+            "history": history,
+            "overall_champion": overall_champion
+        }
+        return summary, history
+
+    def run_and_export(self, output_dir: str | Path) -> Dict[str, Any]:
+        summary, _ = self.run(
+            progress_callback=lambda g, total, s: print(
+                f"[Gen {g+1:02d}/{total:02d}] Best: {s['best_fitness']:6.1f} (Food: {s['best_food']:2d}) | Avg: {s['avg_fitness']:5.1f}"
+            )
+        )
+        out_path = Path(output_dir)
+        out_path.mkdir(parents=True, exist_ok=True)
+        with open(out_path / "summary.json", "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2)
+        return summary
