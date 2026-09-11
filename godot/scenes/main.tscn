@@ -1,0 +1,401 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/arena.gd" id="2_arena"]
+[ext_resource type="Script" path="res://scripts/fitness_graph.gd" id="3_graph"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
+bg_color = Color(0.0470588, 0.0627451, 0.0941176, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.28, 0.42, 0.65)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+bg_color = Color(0.0470588, 0.0627451, 0.0941176, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.28, 0.42, 0.65)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.12, 0.16, 0.24, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.35, 0.5, 0.75)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.045, 0.055, 0.075, 1)
+
+[node name="Arena" type="Node2D" parent="."]
+script = ExtResource("2_arena")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TopMenuBar" type="PanelContainer" parent="UI"]
+offset_left = 14.0
+offset_top = 10.0
+offset_right = 1266.0
+offset_bottom = 52.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="Margin" type="MarginContainer" parent="UI/TopMenuBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="UI/TopMenuBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BtnPlay" type="Button" parent="UI/TopMenuBar/Margin/HBox"]
+custom_minimum_size = Vector2(75, 26)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_font_sizes/font_size = 12
+text = "Pause"
+
+[node name="SpeedOptions" type="OptionButton" parent="UI/TopMenuBar/Margin/HBox"]
+custom_minimum_size = Vector2(76, 26)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_font_sizes/font_size = 12
+
+
+[node name="Sep1" type="VSeparator" parent="UI/TopMenuBar/Margin/HBox"]
+layout_mode = 2
+
+[node name="GenLabel" type="Label" parent="UI/TopMenuBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_font_sizes/font_size = 13
+text = "Gen: 01 / 100 (Live)"
+
+[node name="TickLabel" type="Label" parent="UI/TopMenuBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "Tick: 000 / 600"
+
+[node name="Sep2" type="VSeparator" parent="UI/TopMenuBar/Margin/HBox"]
+layout_mode = 2
+
+[node name="AliveLabel" type="Label" parent="UI/TopMenuBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 13
+text = "Alive: 100"
+
+[node name="DeadLabel" type="Label" parent="UI/TopMenuBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 13
+text = "Dead: 0"
+
+[node name="Spacer" type="Control" parent="UI/TopMenuBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnStatsToggle" type="Button" parent="UI/TopMenuBar/Margin/HBox"]
+custom_minimum_size = Vector2(140, 26)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_font_sizes/font_size = 12
+text = "Graphs & Stats [H]"
+
+[node name="StatsOverlay" type="PanelContainer" parent="UI"]
+offset_left = 930.0
+offset_top = 62.0
+offset_right = 1266.0
+offset_bottom = 712.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
+
+[node name="Margin" type="MarginContainer" parent="UI/StatsOverlay"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="UI/StatsOverlay/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Title" type="Label" parent="UI/StatsOverlay/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "GRAPHS & STATS"
+
+[node name="Sep0" type="HSeparator" parent="UI/StatsOverlay/Margin/VBox"]
+layout_mode = 2
+
+
+[node name="FitnessGraph" type="Control" parent="UI/StatsOverlay/Margin/VBox"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+script = ExtResource("3_graph")
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="Sep2" type="HSeparator" parent="UI/StatsOverlay/Margin/VBox"]
+layout_mode = 2
+
+[node name="Metrics" type="VBoxContainer" parent="UI/StatsOverlay/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="RowBest" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/Metrics"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowBest"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Best Fitness:"
+
+[node name="Val" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowBest"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_font_sizes/font_size = 11
+text = "0.0"
+
+[node name="RowAvg" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/Metrics"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowAvg"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Avg Fitness:"
+
+[node name="Val" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowAvg"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.88, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "0.0"
+
+[node name="RowFood" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/Metrics"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowFood"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Food Eaten:"
+
+[node name="Val" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowFood"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.95, 0.6, 1)
+theme_override_font_sizes/font_size = 11
+text = "0"
+
+[node name="RowEnergy" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/Metrics"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowEnergy"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Leader Energy:"
+
+[node name="Val" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowEnergy"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "100 / 100"
+
+[node name="RowCasualties" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/Metrics"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowCasualties"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Casualties (Haz/Starv):"
+
+[node name="Val" type="Label" parent="UI/StatsOverlay/Margin/VBox/Metrics/RowCasualties"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 11
+text = "0 / 0"
+
+[node name="LblBreakdown" type="Label" parent="UI/StatsOverlay/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 10
+text = "Food: +0 | Surv: +0 | Haz: 0 | Prox: +0"
+
+[node name="Sep3" type="HSeparator" parent="UI/StatsOverlay/Margin/VBox"]
+layout_mode = 2
+
+[node name="LiveConfigBox" type="VBoxContainer" parent="UI/StatsOverlay/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="LblLiveTitle" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_font_sizes/font_size = 11
+text = "LIVE EVOLUTION CONFIG"
+
+[node name="RowMaxGens" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowMaxGens"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Max Gens (-1=∞):"
+
+[node name="SpinMaxGens" type="SpinBox" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowMaxGens"]
+custom_minimum_size = Vector2(85, 24)
+layout_mode = 2
+min_value = -1.0
+max_value = 10000000.0
+step = 1.0
+value = 100.0
+
+[node name="RowPop" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowPop"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Population Size:"
+
+[node name="SpinPop" type="SpinBox" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowPop"]
+custom_minimum_size = Vector2(85, 24)
+layout_mode = 2
+min_value = 1.0
+max_value = 100000.0
+step = 1.0
+value = 100.0
+
+[node name="RowTicks" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowTicks"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Lifespan (Ticks):"
+
+[node name="SpinTicks" type="SpinBox" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowTicks"]
+custom_minimum_size = Vector2(85, 24)
+layout_mode = 2
+min_value = 1.0
+max_value = 10000000.0
+step = 1.0
+value = 600.0
+
+[node name="RowMut" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowMut"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Mutation Rate (%):"
+
+[node name="SpinMut" type="SpinBox" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowMut"]
+custom_minimum_size = Vector2(85, 24)
+layout_mode = 2
+min_value = 0.0
+max_value = 1000.0
+step = 0.1
+value = 10.0
+
+[node name="RowDecay" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowDecay"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Energy Decay:"
+
+[node name="SpinDecay" type="SpinBox" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowDecay"]
+custom_minimum_size = Vector2(85, 24)
+layout_mode = 2
+min_value = -1000.0
+max_value = 10000.0
+step = 0.01
+value = 0.35
+
+[node name="RowFoodCount" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowFoodCount"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Food Pellets:"
+
+[node name="SpinFoodCount" type="SpinBox" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowFoodCount"]
+custom_minimum_size = Vector2(85, 24)
+layout_mode = 2
+min_value = 1.0
+max_value = 10000.0
+step = 1.0
+value = 40.0
+
+[node name="RowFoodGain" type="HBoxContainer" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowFoodGain"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "Food Energy Gain:"
+
+[node name="SpinFoodGain" type="SpinBox" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox/RowFoodGain"]
+custom_minimum_size = Vector2(85, 24)
+layout_mode = 2
+min_value = 0.0
+max_value = 10000.0
+step = 1.0
+value = 40.0
+
+[node name="BtnApplyLive" type="Button" parent="UI/StatsOverlay/Margin/VBox/LiveConfigBox"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_font_sizes/font_size = 11
+text = "Apply & Restart Live Sim"
